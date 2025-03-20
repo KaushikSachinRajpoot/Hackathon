@@ -24,19 +24,22 @@ app.post('/get-size', async (req, res) => {
       const response = await openai.chat.completions.create({
         model: 'gpt-4',
         messages: [
-          { role: 'system', content: 'You are a clothing size recommendation assistant.' },
-          { role: 'user', content: `My height is ${height} cm and weight is ${weight} kg. What clothing size should I wear (S, M, L, XL)?` },
+          { role: 'system',  content: `You are a clothing size assistant for India. Use Indian size charts for brands like Allen Solly, Peter England, and FabIndia.
+            Always return only one size (XS, S, M, L, XL, XXL) without explanation.` },
+          { role: 'user', content: `My height is ${height} cm and weight is ${weight} kg. What is my shirt size?` },
         ],
+        temperature: 0,
+        max_tokens: 5,
       });
-  
+
       const size = response.choices[0]?.message?.content?.trim();
       res.json({ size });
-  
+
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ error: 'Failed to fetch clothing size' });
     }
-  });
+});
 
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
