@@ -1,8 +1,7 @@
-import { Container, Grid2, Card, CardMedia, CardContent, Typography, Button, Chip, Box, Tooltip, IconButton } from "@mui/material";
+import { CircularProgress, Container, Grid2, Card, CardMedia, CardContent, Typography, Button, Chip, Box, Tooltip, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import TryIcon from "@mui/icons-material/TouchApp";
-import productData from '../dummyData/products';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TryNowDialog from "../components/TryNowDialog";
 
 
@@ -27,6 +26,8 @@ const BuyButton = styled(Button)({
 });
 
 const Products = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState("");
     const handleDialogOpen = (image) => {
@@ -34,27 +35,43 @@ const Products = () => {
         setDialogOpen(true);
     };
 
+    useEffect(() => {
+        // Fetch products from backend
+        fetch("http://localhost:4000/products")
+            .then((response) => response.json())
+            .then((data) => {
+                setProducts(data);
+                setLoading(false);
+            })
+            .catch((error) => console.error("Error fetching products:", error));
+    }, []);
+
     return (
         <Container sx={{ marginTop: 4, textAlign: "center" }}>
             <Typography variant="h4" gutterBottom fontWeight="bold" marginBottom="2rem">
                 Explore Our Collection
             </Typography>
+            {loading ? (
+               <Box display="flex" justifyContent="center" alignItems="center" height={100}>
+                  <CircularProgress />
+                </Box>
+            ) : (
             <Grid2 container spacing={3} justifyContent="center">
-                {productData.map((product) => (
-                    <Grid2 key={product.id} sx={{ display: "flex", justifyContent: "center" }}>
+                {products.map((product) => (
+                    <Grid2 key={product._id} sx={{ display: "flex", justifyContent: "center" }}>
                         <ProductCard sx={{ width: "100%", maxWidth: "300px", position: "relative" }}>
                             {/* Image Wrapper with Try Now Button */}
                             <Box sx={{ position: "relative" }}>
                                 <CardMedia
                                     component="img"
                                     sx={{ aspectRatio: "10/9", objectFit: "cover", width: "100%" }}
-                                    image={product.image}
+                                    image={`/assets/${product.image}`}
                                     alt={product.name}
                                 />
                                 {/* Try Now Button with Tooltip */}
                                 <Tooltip title="Click to try your perfect sizes!" arrow>
                                     <IconButton
-                                        onClick={() => handleDialogOpen(product.image)}
+                                        onClick={() => handleDialogOpen(`/assets/${product.image}`)}
                                         sx={{
                                             position: "absolute",
                                             top: 8,
@@ -97,6 +114,7 @@ const Products = () => {
                     </Grid2>
                 ))}
             </Grid2>
+            )}
 
             {/* Dialog Box  */}
             <TryNowDialog open={dialogOpen} handleClose={() => setDialogOpen(false)} selectedImage={selectedImage} />
