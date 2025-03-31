@@ -29,7 +29,6 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imageVariations, setImageVariations] = useState("1"); // Default to 1
-  const [rotationAngle, setRotationAngle] = useState(0);
 
   useEffect(() => {
     if (!open) {
@@ -68,12 +67,6 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
     }
   };
 
-
-  // Handle image rotation
-  const rotateImage = () => {
-    setRotationAngle((prevAngle) => prevAngle + 45);
-  };
-
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Try Now</DialogTitle>
@@ -83,14 +76,14 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
           <img
             src={imageUrl || selectedImage}
             alt="Selected Product"
-            style={{ maxWidth: "100%", height: "200px", objectFit: "contain", transform: `rotate(${rotationAngle}deg)` }}
+            style={{ maxWidth: "100%", height: "200px", objectFit: "contain" }}
           />
         </Box>
 
          {/* Rotate Image Button */}
-         <Box display="flex" justifyContent="center" mb={2}>
+         {/* <Box display="flex" justifyContent="center" mb={2}>
           <Button variant="outlined" onClick={rotateImage}>Rotate 360°</Button>
-        </Box>
+        </Box> */}
 
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height={100}>

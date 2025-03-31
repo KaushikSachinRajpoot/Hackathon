@@ -3,7 +3,6 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { OpenAI } from 'openai';
 import mongoose from 'mongoose';
-import { MongoClient, ServerApiVersion } from 'mongodb';
 import Product from "./models/productModel.js";
 
 dotenv.config();
@@ -101,18 +100,6 @@ app.post("/generate-image", async (req, res) => {
       res.status(500).json({ error: "Failed to generate image." });
     }
   });
-
-  // API to Add Multiple Products
-app.post('/add-products', async (req, res) => {
-  try {
-      const productsData = req.body; // Products list from request body
-      const addedProducts = await Product.insertMany(productsData);
-      res.status(201).json({ message: "Products added successfully!", data: addedProducts });
-  } catch (error) {
-      console.error("Error adding products:", error);
-      res.status(500).json({ error: "Internal server error" });
-  }
-});
 
 // API to Get All Products
 app.get('/products', async (req, res) => {
