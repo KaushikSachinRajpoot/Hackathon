@@ -26,80 +26,68 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-// API to Get Clothing Size
-app.post('/get-size', async (req, res) => {
-    const { height, weight } = req.body;
-  
-    if (!height || !weight) {
-      return res.status(400).json({ error: 'Please provide height and weight' });
-    }
-  
-    try {
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [
-          { role: 'system',  content: `You are a clothing size assistant for India. Use Indian size charts for brands like Allen Solly, Peter England, and FabIndia.
-            Always return only one size (XS, S, M, L, XL, XXL) without explanation.` },
-          { role: 'user', content: `My height is ${height} cm and weight is ${weight} kg. What is my shirt size?` },
-        ],
-        temperature: 0,
-        max_tokens: 5,
-      });
+  app.post('/get-size', async (req, res) => {
+    let { height, weight, gender } = req.body;
 
-      const size = response.choices[0]?.message?.content?.trim();
-      res.json({ size });
+    if (!height || !weight) {
+        return res.status(400).json({ error: 'Please provide height and weight' });
+    }
+
+    // If gender is missing, ask the user
+    if (!gender) {
+        return res.status(400).json({ error: 'Please provide gender (male/female)' });
+    }
+
+    try {
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4',
+            messages: [
+                { role: 'system', content: `You are a clothing size assistant for India. 
+                    Use Indian size charts for brands like Allen Solly, Peter England, and FabIndia.
+                    If gender is 'male', use men's size charts. If gender is 'female', use women's size charts.
+                    Always return only one size (XS, S, M, L, XL, XXL) without explanation.` },
+                { role: 'user', content: `I am ${gender}. My height is ${height} cm and weight is ${weight} kg. What is my shirt size?` },
+            ],
+            temperature: 0,
+            max_tokens: 5,
+        });
+
+        const size = response.choices[0]?.message?.content?.trim();
+        res.json({ size });
 
     } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Failed to fetch clothing size' });
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Failed to fetch clothing size' });
     }
 });
 
 
 
 app.post("/generate-image", async (req, res) => {
-    const { clothing, skinTone, background } = req.body;
-  
-    if (!clothing || !skinTone) {
-      return res.status(400).json({ error: "Clothing and skin tone are required." });
-    }
-  
-    try {
-      const response = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: `A realistic image of a person with ${skinTone} skin tone wearing ${clothing}, plain ${background} background`,
-        n: 1,
-        size: "1024x1024",
-      });
-  
-      res.json({ imageUrl: response.data[0].url });
-    } catch (error) {
-      console.error("Error generating image:", error);
-      res.status(500).json({ error: "Failed to generate image." });
-    }
-  });
+  const { clothing, skinTone, background, gender, n } = req.body;
 
-  app.post("/generate-image", async (req, res) => {
-    const { clothing, skinTone, background } = req.body;
-  
-    if (!clothing || !skinTone) {
-      return res.status(400).json({ error: "Clothing and skin tone are required." });
-    }
-  
-    try {
+  if (!clothing || !skinTone || !gender) {
+      return res.status(400).json({ error: "Clothing, skin tone, and gender are required." });
+  }
+
+  // Set default value for `n` if not provided or invalid
+  const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1; 
+
+  try {
       const response = await openai.images.generate({
-        model: "dall-e-3",
-        prompt: `A realistic image of a person with ${skinTone} skin tone wearing ${clothing}, plain ${background} background`,
-        n: 1,
-        size: "1024x1024",
+          model: "dall-e-3",
+          prompt: `A realistic image of a ${gender} with ${skinTone} skin tone wearing ${clothing}, plain ${background} background.`,
+          n: numImages,
+          size: "1024x1024",
       });
-  
-      res.json({ imageUrl: response.data[0].url });
-    } catch (error) {
+
+      res.json({ imageUrls: response.data.map(img => img.url) });
+  } catch (error) {
       console.error("Error generating image:", error);
       res.status(500).json({ error: "Failed to generate image." });
-    }
-  });
+  }
+});
+
 
 // API to Get All Products
 app.get('/products', async (req, res) => {
