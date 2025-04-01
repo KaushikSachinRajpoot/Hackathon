@@ -17,7 +17,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const skinColors = ["Fair", "Medium", "Tan", "Brown", "Dark"];
-const genders = ["Male", "Female" ];
+const genders = ["Male", "Female"];
 
 const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [height, setHeight] = useState("");
@@ -28,35 +28,35 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [size, setSize] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [imageVariations, setImageVariations] = useState("1"); // Default to 1
+  const [imageVariations, setImageVariations] = useState(); // Default to 1
 
   useEffect(() => {
     if (!open) {
       setHeight("");
       setWeight("");
       setGender("");
-      setBodyColor("Dull Skin Tone");
+      setBodyColor("");
       setSize("");
       setError("");
-      setImageVariations("1");
+      setImageVariations();
     }
   }, [open]);
 
   // Handle form submission
   const handleSubmit = async () => {
-    if (!height || !weight) {
-      setError("Please provide height and weight");
+    if (!height || !weight || !gender) {
+      setError("Please provide height, weight & gender");
       return;
     }
     setLoading(true);
     setError("");
     setSize("");
-    console.log(bodyColor);
 
     try {
       const response = await axios.post("http://localhost:4000/get-size", {
         height,
         weight,
+        gender,
       });
       setSize(response.data.size);
     } catch (err) {
@@ -80,57 +80,93 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
           />
         </Box>
 
-         {/* Rotate Image Button */}
-         {/* <Box display="flex" justifyContent="center" mb={2}>
+        {/* Rotate Image Button */}
+        {/* <Box display="flex" justifyContent="center" mb={2}>
           <Button variant="outlined" onClick={rotateImage}>Rotate 360°</Button>
         </Box> */}
 
         {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" height={100}>
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            height={100}
+          >
             <CircularProgress />
           </Box>
         ) : size ? (
-          <Typography variant="h6" align="center">Recommended Size: {size}</Typography>
+          <Typography variant="h6" align="center">
+            Recommended Size: {size}
+          </Typography>
         ) : (
           <>
             {/* Select Image Dropdown */}
             <FormControl fullWidth margin="dense">
               <InputLabel>Select Image</InputLabel>
-              <Select value={imageUrl} onChange={(e) => setImageUrl(e.target.value)}>
+              <Select
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+              >
                 <MenuItem value={selectedImage}>{selectedImage}</MenuItem>
-                <MenuItem value="https://example.com/image1.jpg">Image 1</MenuItem>
-                <MenuItem value="https://example.com/image2.jpg">Image 2</MenuItem>
+                <MenuItem value="https://example.com/image1.jpg">
+                  Image 1
+                </MenuItem>
+                <MenuItem value="https://example.com/image2.jpg">
+                  Image 2
+                </MenuItem>
               </Select>
             </FormControl>
 
-             {/* Height & Weight Fields */}
-            <TextField label="Height" fullWidth margin="dense" value={height} onChange={(e) => setHeight(e.target.value)} />
-            <TextField label="Weight" fullWidth margin="dense" value={weight} onChange={(e) => setWeight(e.target.value)} />
-           
-           {/* Gender Selection */}
-           <FormControl fullWidth margin="dense">
+            {/* Height & Weight Fields */}
+            <TextField
+              label="Height in cm"
+              fullWidth
+              margin="dense"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+            />
+            <TextField
+              label="Weight in kg"
+              fullWidth
+              margin="dense"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+            />
+
+            {/* Gender Selection */}
+            <FormControl fullWidth margin="dense">
               <InputLabel>Gender</InputLabel>
-              <Select value={gender} onChange={(e) => setGender(e.target.value)}>
+              <Select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
                 {genders.map((gen) => (
-                  <MenuItem key={gen} value={gen}>{gen}</MenuItem>
+                  <MenuItem key={gen} value={gen}>
+                    {gen}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-             {/* Skin Color Selection (Defaults to Dull Skin Tone) */}
+            {/* Skin Color Selection (Defaults to Dull Skin Tone) */}
             <FormControl fullWidth margin="dense">
               <InputLabel>Body Color</InputLabel>
-              <Select value={bodyColor} onChange={(e) => setBodyColor(e.target.value || "Dull")}>
+              <Select
+                value={bodyColor}
+                onChange={(e) => setBodyColor(e.target.value || "Dull")}
+              >
                 {skinColors.map((color) => (
-                  <MenuItem key={color} value={color}>{color}</MenuItem>
+                  <MenuItem key={color} value={color}>
+                    {color}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            
-             {/* Number of Image Variations */}
-             <TextField
+
+            {/* Number of Image Variations */}
+            <TextField
               label="Number of Image Variations (Max 4)"
-              type="number"
+              // type="number"
               fullWidth
               margin="dense"
               value={imageVariations}
