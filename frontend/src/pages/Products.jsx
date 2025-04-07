@@ -65,13 +65,15 @@ const Products = () => {
                                 <CardMedia
                                     component="img"
                                     sx={{ aspectRatio: "10/9", objectFit: "cover", width: "100%" }}
-                                    image={`/assets/${product.image}`}
+                                    // image={`/assets/${product.image}`}
+                                    image={product.image}
                                     alt={product.name}
                                 />
                                 {/* Try Now Button with Tooltip */}
                                 <Tooltip title="Click to try your perfect sizes!" arrow>
                                     <IconButton
-                                        onClick={() => handleDialogOpen(`/assets/${product.image}`)}
+                                        // onClick={() => handleDialogOpen(`/assets/${product.image}`)}
+                                        onClick={() => handleDialogOpen(product.image)}
                                         sx={{
                                             position: "absolute",
                                             top: 8,
