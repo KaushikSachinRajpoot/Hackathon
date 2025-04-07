@@ -30,6 +30,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [error, setError] = useState("");
   const [imageVariations, setImageVariations] = useState(""); // Default to 1
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [generatedImage, setGeneratedImage ] = useState(null);
 
   useEffect(() => {
     if (!open) {
@@ -61,12 +62,25 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
     setSize("");
 
     try {
+      // First API call to fetch size
       const response = await axios.post("http://localhost:4000/get-size", {
         height,
         weight,
         gender,
       });
       setSize(response.data.size);
+
+       // Now call the second API to generate images with the selected parameters
+       const generateImageResponse = await axios.post("http://localhost:4000/generate-image", {
+        clothing: selectedImage, // Assuming 'clothing' is the size
+        skinTone: bodyColor,
+        gender: gender,
+        n: imageVariations || 1, // Use default 1 if imageVariations is not set
+      });
+
+      // Log the generated image URLs
+      console.log("Generated Image URLs:", generateImageResponse.data.imageUrls);
+      setGeneratedImage(generateImageResponse.data.imageUrls);
     } catch (err) {
       setError("Failed to fetch size. Try again.");
       console.log(err);
@@ -76,12 +90,12 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   };
 
   // Validate number input for image variations
-  const handleImageVariationsChange = (e) => {
-    const value = e.target.value;
-    if (/^\d*$/.test(value) && value <= 4) {
-      setImageVariations(value);
-    }
-  };
+  // const handleImageVariationsChange = (e) => {
+  //   const value = e.target.value;
+  //   if (/^\d*$/.test(value) && value <= 4) {
+  //     setImageVariations(value);
+  //   }
+  // };
 
   // Handle image upload
   const handleImageUpload = (e) => {
@@ -98,13 +112,30 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
       <DialogTitle>Try Now</DialogTitle>
       <DialogContent>
         {/* Dislay selected image */}
-        <Box display="flex" justifyContent="center" mb={2}>
+        {generatedImage ? (
+          <Box display="flex" justifyContent="center" mb={2}>
+          <img
+            src={generatedImage}
+            alt="generated Product"
+            style={{ maxWidth: "100%", height: "200px", objectFit: "contain" }}
+          />
+        </Box>
+        ) : (
+          <Box display="flex" justifyContent="center" mb={2}>
           <img
             src={imageUrl || selectedImage || uploadedImage}
             alt="Selected Product"
             style={{ maxWidth: "100%", height: "200px", objectFit: "contain" }}
           />
         </Box>
+        )}
+        {/* <Box display="flex" justifyContent="center" mb={2}>
+          <img
+            src={imageUrl || selectedImage || uploadedImage}
+            alt="Selected Product"
+            style={{ maxWidth: "100%", height: "200px", objectFit: "contain" }}
+          />
+        </Box> */}
 
         {/* Image Upload Option */}
         <input type="file" accept="image/*" onChange={handleImageUpload} />
