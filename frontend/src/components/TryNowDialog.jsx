@@ -28,7 +28,8 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [size, setSize] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [imageVariations, setImageVariations] = useState(); // Default to 1
+  const [imageVariations, setImageVariations] = useState(""); // Default to 1
+  const [uploadedImage, setUploadedImage] = useState(null);
 
   useEffect(() => {
     if (!open) {
@@ -38,9 +39,16 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
       setBodyColor("");
       setSize("");
       setError("");
-      setImageVariations();
+      setImageVariations("");
+      setUploadedImage(null);
     }
   }, [open]);
+
+  console.log('1', height);
+  console.log('2', weight);
+  console.log('3', gender);
+  console.log('4', bodyColor);
+  console.log('5', uploadedImage);
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -67,6 +75,24 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
     }
   };
 
+  // Validate number input for image variations
+  const handleImageVariationsChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value) && value <= 4) {
+      setImageVariations(value);
+    }
+  };
+
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setUploadedImage(imageUrl);
+      setImageUrl(imageUrl);
+    }
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Try Now</DialogTitle>
@@ -74,11 +100,14 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
         {/* Dislay selected image */}
         <Box display="flex" justifyContent="center" mb={2}>
           <img
-            src={imageUrl || selectedImage}
+            src={imageUrl || selectedImage || uploadedImage}
             alt="Selected Product"
             style={{ maxWidth: "100%", height: "200px", objectFit: "contain" }}
           />
         </Box>
+
+        {/* Image Upload Option */}
+        <input type="file" accept="image/*" onChange={handleImageUpload} />
 
         {/* Rotate Image Button */}
         {/* <Box display="flex" justifyContent="center" mb={2}>
@@ -101,7 +130,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
         ) : (
           <>
             {/* Select Image Dropdown */}
-            <FormControl fullWidth margin="dense">
+            {/* <FormControl fullWidth margin="dense">
               <InputLabel>Select Image</InputLabel>
               <Select
                 value={imageUrl}
@@ -115,7 +144,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
                   Image 2
                 </MenuItem>
               </Select>
-            </FormControl>
+            </FormControl> */}
 
             {/* Height & Weight Fields */}
             <TextField
@@ -164,14 +193,21 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
             </FormControl>
 
             {/* Number of Image Variations */}
-            <TextField
+            {/* <TextField
               label="Number of Image Variations (Max 4)"
               // type="number"
               fullWidth
               margin="dense"
               value={imageVariations}
-              onChange={(e) => setImageVariations(e.target.value)}
-            />
+              onChange={handleImageVariationsChange}
+              slotProps={{
+                htmlInput: {
+                  inputMode: "numeric",
+                  pattern: "[0-4]*"
+                }
+              }}
+              // onChange={(e) => setImageVariations(e.target.value)}
+            /> */}
 
             {/* <TextField label="Body Color" fullWidth margin="dense" value={bodyColor} onChange={(e) => setBodyColor(e.target.value)} /> */}
             {error && <Typography color="error">{error}</Typography>}
