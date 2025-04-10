@@ -28,7 +28,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   const [size, setSize] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [imageVariations, setImageVariations] = useState(""); // Default to 1
+  const [imageVariations, setImageVariations] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
   const [generatedImage, setGeneratedImage ] = useState(null);
 
@@ -98,14 +98,14 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
   // };
 
   // Handle image upload
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setUploadedImage(imageUrl);
-      setImageUrl(imageUrl);
-    }
-  };
+  // const handleImageUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const imageUrl = URL.createObjectURL(file);
+  //     setUploadedImage(imageUrl);
+  //     setImageUrl(imageUrl);
+  //   }
+  // };
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
@@ -138,7 +138,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
         </Box> */}
 
         {/* Image Upload Option */}
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
+        {/* <input type="file" accept="image/*" onChange={handleImageUpload} /> */}
 
         {/* Rotate Image Button */}
         {/* <Box display="flex" justifyContent="center" mb={2}>

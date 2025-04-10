@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { OpenAI } from 'openai';
 import mongoose from 'mongoose';
 import Product from "./models/productModel.js";
+import axios from 'axios';
 
 dotenv.config();
 const app = express();
@@ -63,36 +64,102 @@ const openai = new OpenAI({
 
 
 
-app.post("/generate-image", async (req, res) => {
-  const { clothing, skinTone, background, gender, n } = req.body;
+// app.post("/generate-image", async (req, res) => {
+//   const { clothing, skinTone, background, gender, n } = req.body;
 
-  if (!clothing || !skinTone || !gender) {
-      return res.status(400).json({ error: "Clothing, skin tone, and gender are required." });
-  }
+//   if (!clothing || !skinTone || !gender) {
+//       return res.status(400).json({ error: "Clothing, skin tone, and gender are required." });
+//   }
 
-  // Set default value for `n` if not provided or invalid
-  const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1; 
+//   // Set default value for `n` if not provided or invalid
+//   const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1; 
 
-  try {
-      const response = await openai.images.generate({
-          model: "dall-e-3",
-          prompt: `A realistic image of a ${gender} with ${skinTone} skin tone wearing ${clothing}, plain ${background} background.`,
-          n: numImages,
-          size: "1024x1024",
-      });
+//   try {
+//       const response = await openai.images.generate({
+//           model: "dall-e-3",
+//           prompt: `A realistic image of a ${gender} with ${skinTone} skin tone wearing ${clothing}, plain ${background} background.`,
+//           n: numImages,
+//           size: "1024x1024",
+//       });
 
-      res.json({ imageUrls: response.data.map(img => img.url) });
-  } catch (error) {
-      console.error("Error generating image:", error);
-      res.status(500).json({ error: "Failed to generate image." });
-  }
-});
+//       res.json({ imageUrls: response.data.map(img => img.url) });
+//   } catch (error) {
+//       console.error("Error generating image:", error);
+//       res.status(500).json({ error: "Failed to generate image." });
+//   }
+// });
 
 
 // API to Get All Products
+
+app.post("/generate-image", async (req, res) => {
+  const { clothing, skinTone, background = "plain white", gender, n } = req.body;
+
+  if (!clothing || !skinTone || !gender) {
+    console.warn("Missing fields:", { clothing, skinTone, gender });
+    return res.status(400).json({
+      error: "Missing required fields. Please provide clothing, skin tone, background, and gender.",
+    });
+  }
+
+  const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1;
+
+  try {
+    // 🧠 STEP 1: Use GPT-4 Vision to get clothing description
+    const captionResponse = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      max_tokens: 200,
+      messages: [
+        {
+          role: "system",
+          content: "You are a fashion stylist assistant. Describe clothing in detailed fashion terms from images.",
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You are a fashion catalog expert.
+            Describe only the clothing item in the image in as much detail as possible. Focus on:
+            - Garment type (e.g., t-shirt, hoodie, blouse)
+            - Color(s) and pattern
+            - Material/fabric (e.g., cotton, denim, silk)
+            - Style and cut (e.g., loose fit, cropped, V-neck)
+            - Notable features (e.g., buttons, zippers, pockets, graphics)
+            Do NOT describe any people, poses, background, or scene.
+            Be concise but precise.`,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: clothing,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const caption = captionResponse.choices[0].message.content;
+    // 🎨 STEP 2: Generate final image with that caption
+    const imageResponse = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: `A realistic full-body image of a ${gender} with ${skinTone} skin tone wearing: ${caption}, ${background} background.`,
+      n: numImages,
+      size: "1024x1024",
+    });
+
+    const imageUrls = imageResponse.data.map((img) => img.url);
+    res.json({ imageUrls });
+  } catch (error) {
+    console.error("Error generating image:", error?.message || error);
+    res.status(500).json({ error: "Image generation failed." });
+  }
+});
+
 app.get('/products', async (req, res) => {
   try {
-      const products = await Product.find(); // Fetch all products
+      const products = await Product.find();
       res.json(products);
   } catch (error) {
       console.error("Error fetching products:", error);
