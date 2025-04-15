@@ -34,7 +34,6 @@ const openai = new OpenAI({
         return res.status(400).json({ error: 'Please provide height and weight' });
     }
 
-    // If gender is missing, ask the user
     if (!gender) {
         return res.status(400).json({ error: 'Please provide gender (male/female)' });
     }
@@ -63,35 +62,6 @@ const openai = new OpenAI({
 });
 
 
-
-// app.post("/generate-image", async (req, res) => {
-//   const { clothing, skinTone, background, gender, n } = req.body;
-
-//   if (!clothing || !skinTone || !gender) {
-//       return res.status(400).json({ error: "Clothing, skin tone, and gender are required." });
-//   }
-
-//   // Set default value for `n` if not provided or invalid
-//   const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1; 
-
-//   try {
-//       const response = await openai.images.generate({
-//           model: "dall-e-3",
-//           prompt: `A realistic image of a ${gender} with ${skinTone} skin tone wearing ${clothing}, plain ${background} background.`,
-//           n: numImages,
-//           size: "1024x1024",
-//       });
-
-//       res.json({ imageUrls: response.data.map(img => img.url) });
-//   } catch (error) {
-//       console.error("Error generating image:", error);
-//       res.status(500).json({ error: "Failed to generate image." });
-//   }
-// });
-
-
-// API to Get All Products
-
 app.post("/generate-image", async (req, res) => {
   const { clothing, skinTone, background = "plain white", gender, n } = req.body;
 
@@ -102,10 +72,8 @@ app.post("/generate-image", async (req, res) => {
     });
   }
 
-  const numImages = Number(n) > 0 && Number(n) <= 5 ? Number(n) : 1;
 
   try {
-    // 🧠 STEP 1: Use GPT-4 Vision to get clothing description
     const captionResponse = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       max_tokens: 200,
@@ -141,15 +109,15 @@ app.post("/generate-image", async (req, res) => {
     });
 
     const caption = captionResponse.choices[0].message.content;
-    // 🎨 STEP 2: Generate final image with that caption
+    const angles = ["front", "left side", "back", "right side"];
+    const prompt = `A realistic full-body image of a ${gender} with ${skinTone} skin tone wearing ${caption}, viewed from the ${angles}, ${background} background.`;
     const imageResponse = await openai.images.generate({
       model: "dall-e-3",
-      prompt: `A realistic full-body image of a ${gender} with ${skinTone} skin tone wearing: ${caption}, ${background} background.`,
-      n: numImages,
+      prompt,
+      n:1,
       size: "1024x1024",
     });
-
-    const imageUrls = imageResponse.data.map((img) => img.url);
+     const imageUrls = imageResponse.data.map((img) => img.url);
     res.json({ imageUrls });
   } catch (error) {
     console.error("Error generating image:", error?.message || error);
