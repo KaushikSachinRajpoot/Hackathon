@@ -228,101 +228,113 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
             </Box>
 
             {/* Right Side - Form */}
-            <Box width="40%" display="flex" flexDirection="column" gap={2}>
-              <TextField
-                label="Height in cm"
-                fullWidth
-                margin="dense"
-                value={height}
-                onChange={(e) => setHeight(e.target.value)}
-                variant="outlined"
-                sx={{
-                  backgroundColor: "#fff",
-                  borderRadius: 2,
-                  '& .MuiOutlinedInput-root': {
+            <Box
+              width="40%"
+              display="flex"
+              flexDirection="column"
+              gap={2}
+            >
+              <Box display="flex" flexDirection="column" gap={2}>
+                <TextField
+                  label="Height in cm"
+                  fullWidth
+                  margin="dense"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: "#fff",
                     borderRadius: 2,
-                  },
-                }}
-              />
-              <TextField
-                label="Weight in kg"
-                fullWidth
-                margin="dense"
-                value={weight}
-                onChange={(e) => setWeight(e.target.value)}
-                variant="outlined"
-    sx={{
-      backgroundColor: "#fff",
-      borderRadius: 2,
-      '& .MuiOutlinedInput-root': {
-        borderRadius: 2,
-      },
-    }}
-              />
-
-              <FormControl fullWidth margin="dense"
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: 2,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                },
-              }}>
-                <InputLabel>Gender</InputLabel>
-                <Select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  label="Gender"
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                  }}
+                />
+                <TextField
+                  label="Weight in kg"
+                  fullWidth
+                  margin="dense"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  variant="outlined"
+                  sx={{
+                    backgroundColor: "#fff",
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                  }}
+                />
+                <FormControl
+                  fullWidth
+                  margin="dense"
+                  sx={{
+                    backgroundColor: "#fff",
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                  }}
                 >
-                  {genders.map((gen) => (
-                    <MenuItem key={gen} value={gen}>
-                      {gen}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth margin="dense"
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: 2,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                },
-              }}>
-                <InputLabel>Body Color</InputLabel>
-                <Select
-                  value={bodyColor}
-                  onChange={(e) => setBodyColor(e.target.value || "Dull")}
-                   label="Body Color"
+                  <InputLabel>Gender</InputLabel>
+                  <Select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    label="Gender"
+                  >
+                    {genders.map((gen) => (
+                      <MenuItem key={gen} value={gen}>
+                        {gen}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl
+                  fullWidth
+                  margin="dense"
+                  sx={{
+                    backgroundColor: "#fff",
+                    borderRadius: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                    },
+                  }}
                 >
-                  {skinColors.map((color) => (
-                    <MenuItem key={color} value={color}>
-                      {color}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                  <InputLabel>Body Color</InputLabel>
+                  <Select
+                    value={bodyColor}
+                    onChange={(e) => setBodyColor(e.target.value || "Dull")}
+                    label="Body Color"
+                  >
+                    {skinColors.map((color) => (
+                      <MenuItem key={color} value={color}>
+                        {color}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
 
-              {error && (
-                <Typography color="error" mt={1}>
-                  {" "}
-                  {error}{" "}
-                </Typography>
-              )}
+                {error && (
+                  <Typography color="error" mt={1}>
+                    {error}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* Submit Button */}
+              <Box display="flex" justifyContent="center" mt={1}>
+                <Button
+                  onClick={handleSubmit}
+                  variant="contained"
+                  color="primary"
+                >
+                  Submit
+                </Button>
+              </Box>
             </Box>
           </Box>
         )}
       </DialogContent>
-
-      {/* Submit Button - Bottom Right */}
-      {!size && !generatedImage && !loading && (
-        <DialogActions sx={{ justifyContent: "flex-end", pr: 4, pb: 2 }}>
-          <Button onClick={handleSubmit} variant="contained" color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      )}
     </Dialog>
   );
 };
