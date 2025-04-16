@@ -109,7 +109,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
       fullWidth
       PaperProps={{
         sx: {
-          height: "90vh",
+          // height: "auto",
           borderRadius: 3,
           position: "relative",
         },
@@ -152,7 +152,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
             {/* Left Side - Generated Image */}
             <Box
               width="70%"
-              height="460px"
+              maxHeight="460px"
               display="flex"
               justifyContent="center"
               alignItems="center"
@@ -205,7 +205,7 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
             {/* Left Side - Image */}
             <Box
               width="60%"
-              height="460px"
+              maxHeight="460px"
               display="flex"
               justifyContent="center"
               alignItems="center"
