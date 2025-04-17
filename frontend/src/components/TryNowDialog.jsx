@@ -17,7 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const skinColors = ["Fair", "Medium", "Tan", "Dull Skin", "Dark"];
+const skinColors = ["Fair", "Beige", "Tan", "Dull Skin", "Dark"];
 const genders = ["Male", "Female"];
 
 const TryNowDialog = ({ open, handleClose, selectedImage }) => {
@@ -87,6 +87,8 @@ const TryNowDialog = ({ open, handleClose, selectedImage }) => {
           clothing: selectedImage,
           skinTone: bodyColor,
           gender,
+          height,
+          weight,
           n: imageVariations || 1,
         }
       );

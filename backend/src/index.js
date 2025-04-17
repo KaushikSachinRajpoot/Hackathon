@@ -63,7 +63,7 @@ const openai = new OpenAI({
 
 
 app.post("/generate-image", async (req, res) => {
-  const { clothing, skinTone, background = "plain white", gender, n } = req.body;
+  const { clothing, skinTone, background = "plain white", gender, n, height, weight } = req.body;
 
   if (!clothing || !skinTone || !gender) {
     console.warn("Missing fields:", { clothing, skinTone, gender });
@@ -108,14 +108,35 @@ app.post("/generate-image", async (req, res) => {
       ],
     });
 
+    function getBodyShapeFromBMI(h, w) {
+      const heightM = h / 100;
+      const bmi = w / (heightM * heightM);
+      if (bmi < 16) return "extremely underweight, bony appearance";
+      if (bmi < 17) return "moderately underweight, thin with visible bones";
+      if (bmi < 18.5) return "slender, mildly underweight body shape";
+      if (bmi < 25) return "healthy weight with proportional muscle and fat";
+      if (bmi < 30) return "heavier build, fat around belly or hips";
+      if (bmi < 35) return "overweight build with noticeable fat accumulation";
+      if (bmi < 40) return "severely overweight, rounder body shape";
+      if (bmi < 50) return "very obese male, large belly, broad body, heavyset figure";
+      return "very high body fat with visibly large proportions";
+    }
+
+    const bodyDescription = getBodyShapeFromBMI(height, weight);
+
+    
+
     const caption = captionResponse.choices[0].message.content;
     const angles = ["front", "left side", "back", "right side"];
-    const prompt = `A realistic full-body image of a ${gender} with ${skinTone} skin tone wearing ${caption}, viewed from the ${angles}, ${background} background.`;
+    // const prompt = `Full-body portrait of a ${gender} with a ${skinTone} skin tone, wearing ${caption}, viewed from the ${angles}, with a ${background} background.`;
+    // const prompt = `Full-body portrait of a ${gender} with a ${skinTone} skin tone, wearing ${caption}, with a ${background} background.`;
+    const prompt = `A realistic full-body image of a${gender} with a ${skinTone} skin tone, wearing ${caption}, with a ${background} background. The person has a ${bodyDescription}, approximately ${height}cm tall and weighing around ${weight}kg. Realistic proportions.`;
+    // const prompt = `full-body portrait of a ${gender} with ${skinTone} skin tone wearing ${caption}, viewed from the ${angles}, ${background} background.`;
     const imageResponse = await openai.images.generate({
       model: "dall-e-3",
       prompt,
       n:1,
-      size: "1024x1024",
+      size: "1024x1024"
     });
      const imageUrls = imageResponse.data.map((img) => img.url);
     res.json({ imageUrls });
